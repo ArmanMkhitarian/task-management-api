@@ -30,7 +30,7 @@ public class TaskItem
             Title = title,
             Description = description,
             Priority = priority,
-            AssigneeEmail = assigneeEmail,
+            AssigneeEmail = EmailNormalizer.Normalize(assigneeEmail),
             Status = TaskItemStatus.New
         };
     }
@@ -41,7 +41,7 @@ public class TaskItem
         Title = title;
         Description = description;
         Priority = priority;
-        AssigneeEmail = assigneeEmail;
+        AssigneeEmail = EmailNormalizer.Normalize(assigneeEmail);
     }
 
     /// <summary>Устанавливает статус. Допустимость перехода проверяет вызывающий слой (TaskStatusPolicy).</summary>

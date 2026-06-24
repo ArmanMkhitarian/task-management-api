@@ -1,3 +1,4 @@
+using TaskManagement.Application.Common;
 using TaskManagement.Application.Common.Exceptions;
 using TaskManagement.Application.Domain;
 using TaskManagement.Application.Tasks.Abstractions;
@@ -42,7 +43,10 @@ public class TaskService : ITaskService
 
     public async Task<PagedResult<TaskResponse>> GetListAsync(TaskListFilter filter, CancellationToken cancellationToken)
     {
-        var (items, totalCount) = await _repository.GetListAsync(filter, cancellationToken);
+        // Нормализуем email фильтра под канонично хранимое значение — сравнение в SQL точное.
+        var normalizedFilter = filter with { AssigneeEmail = EmailNormalizer.Normalize(filter.AssigneeEmail) };
+
+        var (items, totalCount) = await _repository.GetListAsync(normalizedFilter, cancellationToken);
 
         var responses = items.Select(t => t.ToResponse()).ToList();
 
@@ -95,8 +99,10 @@ public class TaskService : ITaskService
         await _repository.SaveChangesAsync(cancellationToken);
     }
 
-    /// <summary>Уведомляем, только если задача стала назначена на нового непустого исполнителя.</summary>
+    /// <summary>
+    /// Уведомляем, только если задача стала назначена на нового непустого исполнителя.
+    /// Email уже нормализован в entity (lower), поэтому сравнение точное (ordinal).
+    /// </summary>
     private static bool IsNewAssignment(string? previous, string? current) =>
-        !string.IsNullOrWhiteSpace(current) &&
-        !string.Equals(previous, current, StringComparison.OrdinalIgnoreCase);
+        current is not null && !string.Equals(previous, current, StringComparison.Ordinal);
 }
