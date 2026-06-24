@@ -81,6 +81,17 @@ curl "http://localhost:8080/api/tasks?priority=High&limit=10"
 `Review → Done|InProgress`, `Done` — терминальный. Запрещённый переход возвращает `409`
 с перечнем допустимых переходов.
 
+## Скриншоты
+
+Swagger UI и примеры запросов — в [docs/](docs/).
+
+| | |
+|---|---|
+| Обзор эндпоинтов | ![Swagger overview](docs/swagger-overview.jpg) |
+| Создание задачи (`POST`) | ![Создание задачи](docs/swagger-create-task.jpg) |
+| Запрещённый переход статуса → `409` | ![Запрещённый переход](docs/swagger-forbidden-transition.jpg) |
+| Health check | ![Health](docs/swagger-health.jpg) |
+
 ## Тесты
 
 Тесты разделены на unit (без внешних зависимостей) и интеграционные
@@ -101,3 +112,4 @@ dotnet test --filter "FullyQualifiedName~Integration"    # только инте
 - [AI_DECISIONS.md](AI_DECISIONS.md) — журнал принятых технических решений с обоснованиями.
 - [PLAN.md](PLAN.md) — план реализации по этапам.
 - [PROMPTS.md](PROMPTS.md) — история промптов/диалога по ходу разработки.
+- [TOOLS.md](TOOLS.md) — инструменты, использованные при разработке.
