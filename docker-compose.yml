@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: taskmanagement
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Наружу порт не пробрасываем — БД доступна только внутри сети compose.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d taskmanagement"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: .
+    depends_on:
+      db:
+        # Ждём готовности БД — авто-миграции при старте не должны упасть на недоступной БД.
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Postgres: "Host=db;Port=5432;Database=taskmanagement;Username=postgres;Password=postgres"
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
