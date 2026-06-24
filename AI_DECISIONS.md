@@ -12,8 +12,9 @@
 - **Удаление:** hard delete — soft delete не в требованиях, не усложняем без причины.
 - **Имена типов:** `TaskItem` / `TaskItemStatus` (не `Task`/`TaskStatus`) — чтобы не конфликтовать с `System.Threading.Tasks`.
 - **Генерация Id:** последовательный uuid (UUIDv7) в фабрике `TaskItem.Create` через статический helper `SequentialGuid`; абстракция `IGuidProvider` отклонена — лишний слой для детерминированной генерации.
-- **Смена статуса:** отдельный `PATCH /api/tasks/{id}/status` в дополнение к `PUT` — требование заказчика.
-- **Переходы статусов:** валидируются через `TaskStatusPolicy` (в `PUT` и `PATCH`) — единая точка правила, нельзя обойти через полное обновление. Матрица:
+- **Смена статуса:** только через `PATCH /api/tasks/{id}/status`; `PUT` обновляет редактируемые поля (Title, Description, Priority, AssigneeEmail) **без** статуса — жизненный цикл отделён от редактирования, нельзя случайно перескочить статус полным обновлением.
+- **Доступ к данным:** `ITaskRepository` со специализированными методами (`GetByIdAsync`, `GetListAsync(TaskListFilter)`, `Add`/`Remove`/`SaveChangesAsync`); `IQueryable` не протекает в Application. Минусы (жёсткость репозитория при росте числа запросов, фильтры/сортировка живут в Infrastructure) пренебрежимы для одной сущности с 3 фильтрами; взамен — Application не зависит от EF и нет риска преждевременной материализации в памяти.
+- **Переходы статусов:** валидируются через `TaskStatusPolicy` (в пути `PATCH /status`) — единая точка правила. Матрица:
   ```
   New → InProgress | InProgress → Review|New | Review → Done|InProgress | Done → терминал
   ```
