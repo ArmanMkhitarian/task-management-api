@@ -14,9 +14,14 @@
 
 ## Этап 2 — Domain + EF
 
-- Entity `Task`: Id, Title, Description, Status, Priority, CreatedAt, UpdatedAt, AssigneeEmail.
+- Entity `Task`: Id (`Guid`), Title, Description, Status, Priority, CreatedAt, UpdatedAt, AssigneeEmail.
+- Id — последовательный uuid (v7-style генерация на стороне приложения, не БД).
 - Enums `TaskItemStatus` (New/InProgress/Review/Done), `TaskPriority` (Low/Medium/High/Critical).
-- `AppDbContext` + `IEntityTypeConfiguration` (enum→string, индексы по фильтрам, ограничения длины).
+- `AppDbContext` + `IEntityTypeConfiguration` по [схеме в AI_DECISIONS](AI_DECISIONS.md):
+  - enum→string, длины (`title` 200, `description` 4000, `status`/`priority` 20, `assignee_email` 254);
+  - snake_case-именование колонок;
+  - индексы PK(`id`), `IX(assignee_email)`, `IX(created_at DESC)`;
+  - `xmin` как concurrency-token (optimistic).
 - `SaveChanges` override: проставление `CreatedAt`/`UpdatedAt` (UTC).
 - Первая миграция `InitialCreate`.
 
