@@ -30,8 +30,8 @@ TaskManagement.Tests           xUnit + Testcontainers + WebApplicationFactory
 - **Ошибки — ProblemDetails (RFC 7807)** через единый middleware. 409 для запрещённого перехода статуса с явным сообщением.
 - **Enum — строками** и в БД (`HasConversion<string>`), и в JSON (`JsonStringEnumConverter`).
 - **Аудит-поля** `CreatedAt`/`UpdatedAt` — только в `SaveChanges` override (UTC), никогда из клиента.
-- **Переходы статусов** — через `TaskStatusPolicy` (Application), применяется и в `PUT`, и в `PATCH /status`.
-- **Запросы списка** — через `IQueryable` с проекцией в DTO; фильтры/пагинация до материализации (никаких `ToList()` раньше времени).
+- **Смена статуса** — только через `PATCH /status`; `PUT` обновляет редактируемые поля без статуса. Переход валидируется `TaskStatusPolicy` (Application).
+- **Запросы списка** — `ITaskRepository` со специализированными методами, `IQueryable` наружу не отдаём. Фильтры/сортировка/пагинация выполняются в SQL до материализации (никаких `ToList()` раньше времени); маппинг entity → DTO — в сервисе после материализации.
 - **Email при назначении** — синхронно через `IEmailSender` при заполнении/смене `AssigneeEmail`.
 - Время — всегда UTC. Удаление — hard delete.
 
